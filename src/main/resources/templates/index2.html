@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<h4 th:text="${message}"></h4>
+<th:block th:if="${name == 'Mariom'}" th:text="'Mariom Mishu'"></th:block>
+<th:block th:unless="${name == 'Mariom'}" th:text="'Mariom Mishu does not belong here'"></th:block>
+<th:block th:switch="false">
+	<p th:case="${(result lt 40)}">F</p>
+	<p th:case="${(result ge 40 && result lt 50)}">C</p>
+	<p th:case="${(result ge 50 && result lt 60)}">B</p>
+	<p th:case="${(result ge 60 && result lt 70)}">A-</p>
+	<p th:case="${(result ge 70 && result lt 80)}">A</p>
+	<p th:case="${(result ge 80)}">A+</p>
+	<p th:case="*">undefined</p>
+</th:block>
+<th:block th:each="item : ${list}">
+	<p th:text="${item}"></p>
+</th:block>
+<h1>Hello Spring Boot</h1>
+</body>
+</html>

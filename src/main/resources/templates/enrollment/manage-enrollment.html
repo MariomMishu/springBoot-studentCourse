@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+	<!--/*/ <th:block th:include="@{fragments/commons} :: head(${title})"></th:block> /*/-->
+	
+	<body class="sb-nav-fixed">
+		<!--/*/ <th:block th:include="@{fragments/commons} :: navigation"></th:block> /*/-->
+		
+		<div id="layoutSidenav">
+			 <div id="layoutSidenav_nav">
+				<!--/*/ <th:block th:include="@{fragments/commons} :: layoutSidenav_nav"></th:block> /*/-->
+			</div>
+			<div id="layoutSidenav_content">
+				<main>
+                    <div class="container">
+                        <div class="row justify-content-left">
+                            <div class="col-lg-12">
+                            <!------------------------------------- region: form --------------------------------------->
+								<div class="col-lg-8">
+                            	<div class="card-header">
+                            	
+                            	<h3 class="text-center font-weight-light my-7">Add New Enrollment</h3></div>
+                                    <div class="card-body">
+                                        <form id="form" class="form">
+               
+                                        	<div class="form-group">
+												<label class="small mb-1" for="department">Department</label>
+												<select name="departmentId" id="department" >
+												<option value="0" disabled selected>Select</option>
+													<option th:each="department : ${departments}"  
+															th:value="${department.id}" 
+															th:text="${department.name}"></option>
+												</select>										   
+											</div>
+                                        <div class="form-group">
+												<label class="small mb-1" for="student">Student</label>
+												<select name="studentId" id="student" class="all_student">
+													<option th:each="student : ${student_list}"  th:value="${student.id}" th:text="${student.name}"></option>
+												</select>											   
+											</div>
+                                           <div class="form-group">
+												<label class="small mb-1" for="trimester">Trimester</label>
+												<select name="trimesterId" id="trimester">
+													<option th:each="trimester : ${trimestersList}"  th:value="${trimester.id}" th:text="${trimester.name}"></option>
+												</select>
+											   
+											</div>
+											
+								              <div class="form-group">
+												<label class="small mb-1" for="course">Course List</label>
+												<select  name="courseIds" multiple  id="course" class="all_course">
+											  		<option th:each="course : ${course_list}"
+												            th:value="${course.id}"
+												            th:text="${course.name}">
+												    </option>												   
+										      </select>
+											   
+											</div>            
+										
+											                              
+											<div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0"> 
+											<!----------------------------------------------------------------->
+      
+											    <button class="btn btn-primary" >Save</button>
+											</div>
+											 
+                                        </form>
+                                    	</div></div>
+                                    	<!----------------------------------- endregion -------------------------------------------->
+                                    	<!-- region: all Enrollments -->
+                                    	<div class="col-lg-12">
+                            				<!-- <div class="card-header"><h3 class="text-center font-weight-light my-11">View All Enrollments</h3></div>
+                                    		 --><div class="card-body">
+			                                    <table class="table table-hover">
+									                <thead>
+										                <tr class="bg-info">
+										                    <th>Id</th>
+										                    <th>Student Name</th>
+										                    <th>Session Trimester</th>
+										                    <th>Action</th>
+										                </tr>
+									                </thead>
+									                <tbody class="table-body">
+										                <th:block th:each="enroll : ${enrollment_list}">
+										                    <tr>
+										                        <td th:text="${enroll.id}"></td>
+										                        <td th:text="${enroll.student.name}"></td>
+										                        <td th:text="${enroll.sessionTrimester.name}"></td>							                      
+																<td><a th:href="@{'/enrollment/edit/'+${enroll.id}}">Edit</a> 
+																<!-- || <a th:href="@{'/employee/delete/'+${employee.id}}">Delete</a> -->
+																</td>
+			                    							</tr>
+			               							 	</th:block>
+			               							 </tbody>
+									            </table>
+						        </div>
+                              </div>
+                             
+                             <!-- endregion -->
+                                   	</div>
+                                   </div>
+                            
+                                </div>
+                </main>
+                <!--/*/ <th:block th:include="@{fragments/commons} :: footer"></th:block> /*/-->
+			</div>
+		</div>
+
+<!--/*/ <th:block th:include="@{fragments/commons} :: scripts_link"></th:block> /*/-->
+<script>
+$(document).ready(function() {
+	
+	
+         $('#department').change(function(e) { 
+            e.preventDefault();
+            console.log(this.value);
+            
+          var departmentId = $(this).val();
+           $.ajax({
+              type: "GET",
+              url: "/enrollment/getStudentList/" + departmentId,
+        		headers: {
+		                'Accept': 'application/json',
+		                'Content-Type': 'application/json'
+            	},
+              success : function(response){ 
+            	 // alert(response);
+            	  $(".all_student").empty();  
+                  var row = `<option value="0" disabled selected>Select</option>`;
+                  $.each(response, function (i, item) {
+                      row += `<option value="${item.id}"> ${item.name} </option>`;
+                  });
+                  $(".all_student").append(row);
+            	                                           
+                  },
+                 
+                  error: function () {
+                      alert("error");
+                  }
+              });
+          });  
+
+	  $.ajax({
+	        url: '/enrollment/ajaxGetAll',
+	        headers: {
+	            'Accept': 'application/json',
+	            'Content-Type': 'application/json'
+	        },
+	        success: function (response) {
+//alert(resp)
+	            $.each(response, function (i, item) {
+	                var row = `<tr>
+	                            <td>${item.id}</td>
+	                                 <td>${item.studentName}</td>
+	                                 <td>${item.trimesterName}</td>
+	                                 <td>
+	                                 <button type="submit"class="btn btn-success" onclick="edit(${item.id})">Edit</button>
+	                                 <button type="submit"class="btn btn-danger" onclick="delete(${item.id})">Delete</button>
+	                                  </td>
+	                        </tr>`;
+	                $(".table-body").append(row);
+	            });
+	        },
+	        error: function (err) {
+	            console.log(err);
+	        }
+	    });
+
+	    $(".form").on('submit', function (e) {
+	        e.preventDefault();
+	        var data = JSON.stringify($(this).serializeObject());
+	        var url = '/enrollment/ajaxAdd';
+
+	        $.ajax({
+	            data: data,
+	            url: url,
+	            method: 'POST',
+	            headers: {
+	                'Accept': 'application/json',
+	                'Content-Type': 'application/json'
+	            },
+	            success: function (response) {
+	            	//alert(resp)
+	                var row = `<tr>
+	                                <td>${response.id}</td>
+	                                <td>${response.studentName}</td>
+	                                 <td>${response.trimesterName}</td>
+	                                 <td>
+	                                 <button type="submit"class="btn btn-success"  onclick="edit(${response.id})">Edit</button>
+	                                 <button type="submit"class="btn btn-danger" onclick="delete(${response.id})">Delete</button>
+	                                  </td>
+	                                 </tr>`;
+	                $(".table-body").append(row);
+	                $("input").val("");
+	            },
+	            error: function (err) {
+	                console.log(err);
+	            }
+	        });
+	    });
+
+
+	    
+
+	    $.fn.serializeObject = function () {
+	        var o = {};
+	        var a = this.serializeArray();
+	        $.each(a, function () {
+	            if (o[this.name] !== undefined) {
+	                if (!o[this.name].push) {
+	                    o[this.name] = [o[this.name]];
+	                }
+	                o[this.name].push(this.value || '');
+	            } else {
+	                o[this.name] = this.value || '';
+	            }
+	        });
+	        return o;
+	    };
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+	<!--/*/ <th:block th:include="@{fragments/commons} :: head(${title})"></th:block> /*/-->
+	
+	<body class="sb-nav-fixed">
+		<!--/*/ <th:block th:include="@{fragments/commons} :: navigation"></th:block> /*/-->
+		
+		<div id="layoutSidenav">
+			 <div id="layoutSidenav_nav">
+				<!--/*/ <th:block th:include="@{fragments/commons} :: layoutSidenav_nav"></th:block> /*/-->
+			</div>
+			<div id="layoutSidenav_content">
+				<main>
+                    <div class="container">
+                        <div class="row justify-content-left">
+                            <div class="col-lg-8">
+                            <!------------------------------------- region: form --------------------------------------->
+				
+                            	<div class="card-header">
+                            	
+                            	<h3 class="text-center font-weight-light my-7">Add New Batch</h3></div>
+                                    <div class="card-body">
+                                        <form id="form" class="form">
+                                           <div class="form-group">
+												<label class="small mb-1" for="trimester">Trimester</label>
+												<select name="trimesterId" id="trimester">
+													<option th:each="trimester : ${trimesters}"  th:value="${trimester.id}" th:text="${trimester.name}"></option>
+												</select>
+											   
+											</div>
+											
+											<div class="form-group">
+												<label class="small mb-1" for="name">Name</label>
+												<input type="hidden" name="id" />
+											    <input type="text" name="name"  />
+											</div>
+											                              
+											<div class="form-group d-flex align-items-center justify-content-between mt-4 mb-0"> 
+											<!----------------------------------------------------------------->
+      
+											    <button class="btn btn-primary" >Save</button>
+											</div>
+											 
+                                        </form>
+                                    	</div><br/>
+                                    	<!----------------------------------- endregion -------------------------------------------->
+                                    	<!-- region: all students -->
+                                    	<div class="col-lg-12">
+                            				<div class="card-header"><h3 class="text-center font-weight-light my-11">View All Batch</h3></div>
+                                    		<div class="card-body">
+			                                    <table class="table table-hover">
+									                <thead>
+										                <tr class="bg-info">
+										                    <th>Id</th>
+										                    <th>Batch Name</th>
+										                    <th>Session Trimester</th>
+										                    <th>Action</th>
+										                </tr>
+									                </thead>
+									                <tbody class="table-body">
+										                <th:block th:each="batch : ${batchList}">
+										                    <tr>
+										                        <td th:text="${batch.id}"></td>
+										                        <td th:text="${batch.name}"></td>
+										                       <td th:text="${batch.trimester.name}"></td>							                      
+																<td><a th:href="@{'/batch/edit/'+${batch.id}}">Edit</a> 
+																<!-- || <a th:href="@{'/batch/delete/'+${batch.id}}">Delete</a> -->
+																</td>
+			                    							</tr>
+			               							 	</th:block>
+			               							 </tbody>
+									            </table>
+						        </div>
+                              </div>
+                              <!-- endregion -->
+                                   	</div>
+                                   </div>
+                            
+                                </div>
+                </main>
+                <!--/*/ <th:block th:include="@{fragments/commons} :: footer"></th:block> /*/-->
+			</div>
+		</div>
+
+<!--/*/ <th:block th:include="@{fragments/commons} :: scripts_link"></th:block> /*/-->
+<script>
+$(document).ready(function() {
+
+    $.ajax({
+            url: '/batch/getAllOnPageLoad',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            success: function(resp) {
+                console.log(resp);
+                $.each(resp, function(i, item) {
+                    var row = `<tr>
+                            <td>${item.id}</td>
+                            <td>${item.name}</td>
+                            <td>${item.trimesterName}</td>
+                            <td>Edit</td>
+                        </tr>`;
+                    $(".table-body").append(row);
+                });
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        });
+
+    $("#form").on('submit', function(e) {
+    //	alert("test")
+        e.preventDefault();
+        var data = JSON.stringify($(this).serializeObject());
+        var url = '/batch/save';
+       
+jQuery.ajax({
+            data: data,
+            url: url,
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            success: function(resp) {
+                console.log(resp);
+                var row = `<tr>
+                            <td>${resp.id}</td>
+                            <td>${resp.name}</td>
+                            <td>${resp.trimesterName}</td>
+                            <td>Edit</td>
+                        </tr>`;
+                $(".table-body").append(row);
+                $("input").val("");
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        });
+    });
+
+    $.fn.serializeObject = function() {
+        var o = {};
+        var a = this.serializeArray();
+        $.each(a, function() {
+            if (o[this.name] !== undefined) {
+                if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                }
+                o[this.name].push(this.value || '');
+            } else {
+                o[this.name] = this.value || '';
+            }
+        });
+        return o;
+    };
+});
+</script>
+</body>
+</html>
